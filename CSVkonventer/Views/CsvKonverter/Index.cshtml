@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+  
+    <h2>Index</h2>
+    <h3>Uploadni:</h3>
+
+    @using (Html.BeginForm("CreateXml", "CsvKonverter", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {        
+        <input type="number" name="startNumber" /><br />
+        <input type='file' name='files[0]' id='file1' /><br />       
+        <input type='file' name='files[1]' id='file2' /><br />       
+        <input type='file' name='files[2]' id='file3' />
+        <input type="submit">
+    }
+}
+

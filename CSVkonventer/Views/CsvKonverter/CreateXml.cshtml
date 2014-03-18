@@ -1,0 +1,137 @@
+﻿@{
+    Layout = "";
+}@model CSVkonventer.Models.InvoicesViewModel
+<?xml version="1.0" encoding="Windows-1250"?>
+<dat:dataPack version="2.0" id="Konvertor" ico="46238425" application="Transformace" note="Uživatelský export" xmlns:dat="http://www.stormware.cz/schema/version_2/data.xsd">
+	 @{int cislo = Model.StartNumberingFrom; }     
+     @foreach(var invoice in Model.Invoices) {
+     cislo++;  
+     <dat:dataPackItem version="2.0" id="Konvertor (@cislo.ToString("D3"))">      
+		<inv:invoice version="2.0" xmlns:inv="http://www.stormware.cz/schema/version_2/invoice.xsd">
+			<inv:invoiceHeader xmlns:rsp="http://www.stormware.cz/schema/version_2/response.xsd" xmlns:rdc="http://www.stormware.cz/schema/version_2/documentresponse.xsd" xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd" xmlns:lst="http://www.stormware.cz/schema/version_2/list.xsd" xmlns:lStk="http://www.stormware.cz/schema/version_2/list_stock.xsd" xmlns:lAdb="http://www.stormware.cz/schema/version_2/list_addBook.xsd" xmlns:acu="http://www.stormware.cz/schema/version_2/accountingunit.xsd" xmlns:vch="http://www.stormware.cz/schema/version_2/voucher.xsd" xmlns:int="http://www.stormware.cz/schema/version_2/intDoc.xsd" xmlns:stk="http://www.stormware.cz/schema/version_2/stock.xsd" xmlns:ord="http://www.stormware.cz/schema/version_2/order.xsd" xmlns:ofr="http://www.stormware.cz/schema/version_2/offer.xsd" xmlns:enq="http://www.stormware.cz/schema/version_2/enquiry.xsd" xmlns:vyd="http://www.stormware.cz/schema/version_2/vydejka.xsd" xmlns:pri="http://www.stormware.cz/schema/version_2/prijemka.xsd" xmlns:bal="http://www.stormware.cz/schema/version_2/balance.xsd" xmlns:pre="http://www.stormware.cz/schema/version_2/prevodka.xsd" xmlns:vyr="http://www.stormware.cz/schema/version_2/vyroba.xsd" xmlns:pro="http://www.stormware.cz/schema/version_2/prodejka.xsd" xmlns:con="http://www.stormware.cz/schema/version_2/contract.xsd" xmlns:adb="http://www.stormware.cz/schema/version_2/addressbook.xsd" xmlns:prm="http://www.stormware.cz/schema/version_2/parameter.xsd" xmlns:lCon="http://www.stormware.cz/schema/version_2/list_contract.xsd" xmlns:ctg="http://www.stormware.cz/schema/version_2/category.xsd" xmlns:ipm="http://www.stormware.cz/schema/version_2/intParam.xsd" xmlns:str="http://www.stormware.cz/schema/version_2/storage.xsd" xmlns:idp="http://www.stormware.cz/schema/version_2/individualPrice.xsd" xmlns:sup="http://www.stormware.cz/schema/version_2/supplier.xsd" xmlns:prn="http://www.stormware.cz/schema/version_2/print.xsd" xmlns:act="http://www.stormware.cz/schema/version_2/accountancy.xsd" xmlns:bnk="http://www.stormware.cz/schema/version_2/bank.xsd">
+				<inv:invoiceType>issuedInvoice</inv:invoiceType>
+			    <inv:number>
+					<typ:numberRequested>INV0@(invoice.invoice_number)</typ:numberRequested>
+				</inv:number>
+				<inv:symVar>@invoice.invoice_number</inv:symVar>
+                <inv:symPar>INV0@(invoice.invoice_number)</inv:symPar>
+				<inv:date>@invoice.date</inv:date>
+				<inv:dateTax>@invoice.date</inv:dateTax>
+				<inv:dateAccounting>@invoice.date</inv:dateAccounting>
+				<inv:dateDue>@invoice.closed_at</inv:dateDue>
+				<inv:accounting>
+					<typ:ids>2/3</typ:ids>                                 
+				</inv:accounting>
+				<inv:classificationVAT>
+					<typ:ids>@invoice.UD_UN</typ:ids>
+					<typ:classificationVATType>@(invoice.UD_UN=="UN" ? "nonSubsume" : "")</typ:classificationVATType>
+				</inv:classificationVAT>
+				<inv:text>@invoice.line_item_description @invoice.line_item_start_date.Replace('-','.')-@invoice.line_item_end_date.Replace('-','.')</inv:text>
+				<inv:partnerIdentity>
+					<typ:address>
+						<typ:company>@Html.Raw(invoice.company)</typ:company>
+						<typ:name>@Html.Raw(invoice.account_name)</typ:name>
+						<typ:city>@Html.Raw(invoice.city)</typ:city>
+						<typ:street>@Html.Raw(invoice.street)</typ:street>
+                        <typ:icDph>@invoice.vat_number</typ:icDph>
+						<typ:country>
+			                <typ:ids>@invoice.purchase_country</typ:ids>
+		                </typ:country>
+                        <typ:email>@invoice.email</typ:email>
+					</typ:address>
+					<typ:shipToAddress>
+						<typ:company>
+						</typ:company>
+						<typ:name>
+						</typ:name>
+						<typ:city>
+						</typ:city>
+						<typ:street>
+						</typ:street>
+                        <typ:email>
+						</typ:email>
+					</typ:shipToAddress>
+				</inv:partnerIdentity>
+				<inv:myIdentity>
+					<typ:address>
+						<typ:company>Work in Field s.r.o.</typ:company>
+                        <typ:name>Richard Voda</typ:name>
+						<typ:city>Bratislava 1</typ:city>
+						<typ:street>Grösslingova</typ:street>
+						<typ:number>54</typ:number>
+						<typ:zip>811 07</typ:zip>
+						<typ:ico>46238425</typ:ico>
+						<typ:dic>2023292546</typ:dic>
+						<typ:icDph>SK2023292546</typ:icDph>
+						<typ:phone>0905 599 435</typ:phone>
+						<typ:mobilPhone>0905 599 435</typ:mobilPhone>
+						<typ:email>richard.voda@gmail.com</typ:email>
+					</typ:address>
+				</inv:myIdentity>
+				<inv:paymentType>
+					<typ:ids>Príkazom</typ:ids>
+					<typ:paymentType>draft</typ:paymentType>
+				</inv:paymentType>
+				<inv:account>
+					<typ:ids>TB</typ:ids>
+				</inv:account>
+				<inv:symConst>0308</inv:symConst>
+				<inv:liquidation>
+					<typ:amountHome>@invoice.homeTotal</typ:amountHome>
+					<typ:amountForeign>@invoice.total</typ:amountForeign>
+				</inv:liquidation>
+			</inv:invoiceHeader>
+             @if(invoice.UD_UN=="UD"){
+			<inv:invoiceDetail xmlns:rsp="http://www.stormware.cz/schema/version_2/response.xsd" xmlns:rdc="http://www.stormware.cz/schema/version_2/documentresponse.xsd" xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd" xmlns:lst="http://www.stormware.cz/schema/version_2/list.xsd" xmlns:lStk="http://www.stormware.cz/schema/version_2/list_stock.xsd" xmlns:lAdb="http://www.stormware.cz/schema/version_2/list_addBook.xsd" xmlns:acu="http://www.stormware.cz/schema/version_2/accountingunit.xsd" xmlns:vch="http://www.stormware.cz/schema/version_2/voucher.xsd" xmlns:int="http://www.stormware.cz/schema/version_2/intDoc.xsd" xmlns:stk="http://www.stormware.cz/schema/version_2/stock.xsd" xmlns:ord="http://www.stormware.cz/schema/version_2/order.xsd" xmlns:ofr="http://www.stormware.cz/schema/version_2/offer.xsd" xmlns:enq="http://www.stormware.cz/schema/version_2/enquiry.xsd" xmlns:vyd="http://www.stormware.cz/schema/version_2/vydejka.xsd" xmlns:pri="http://www.stormware.cz/schema/version_2/prijemka.xsd" xmlns:bal="http://www.stormware.cz/schema/version_2/balance.xsd" xmlns:pre="http://www.stormware.cz/schema/version_2/prevodka.xsd" xmlns:vyr="http://www.stormware.cz/schema/version_2/vyroba.xsd" xmlns:pro="http://www.stormware.cz/schema/version_2/prodejka.xsd" xmlns:con="http://www.stormware.cz/schema/version_2/contract.xsd" xmlns:adb="http://www.stormware.cz/schema/version_2/addressbook.xsd" xmlns:prm="http://www.stormware.cz/schema/version_2/parameter.xsd" xmlns:lCon="http://www.stormware.cz/schema/version_2/list_contract.xsd" xmlns:ctg="http://www.stormware.cz/schema/version_2/category.xsd" xmlns:ipm="http://www.stormware.cz/schema/version_2/intParam.xsd" xmlns:str="http://www.stormware.cz/schema/version_2/storage.xsd" xmlns:idp="http://www.stormware.cz/schema/version_2/individualPrice.xsd" xmlns:sup="http://www.stormware.cz/schema/version_2/supplier.xsd" xmlns:prn="http://www.stormware.cz/schema/version_2/print.xsd" xmlns:act="http://www.stormware.cz/schema/version_2/accountancy.xsd" xmlns:bnk="http://www.stormware.cz/schema/version_2/bank.xsd">
+				<inv:invoiceItem>
+				<inv:quantity>1.0</inv:quantity>
+				<inv:coefficient>1.0</inv:coefficient>
+				<inv:payVAT>false</inv:payVAT>
+				<inv:rateVAT>high</inv:rateVAT>
+				<inv:discountPercentage>0.0</inv:discountPercentage>
+				<inv:homeCurrency>
+					<typ:unitPrice>@invoice.homePrice</typ:unitPrice>
+					<typ:price>@invoice.homePrice</typ:price>
+					<typ:priceVAT>@invoice.homeTax</typ:priceVAT>
+					<typ:priceSum>@invoice.homeTotal</typ:priceSum>
+				</inv:homeCurrency>
+				<inv:foreignCurrency>
+					<typ:unitPrice>@invoice.totalPrice</typ:unitPrice>
+					<typ:price>@invoice.totalPrice</typ:price>
+					<typ:priceVAT>@invoice.totalTax</typ:priceVAT>
+					<typ:priceSum>@invoice.total</typ:priceSum>
+				</inv:foreignCurrency>
+			</inv:invoiceItem>
+			</inv:invoiceDetail>
+             }
+			<inv:invoiceSummary xmlns:rsp="http://www.stormware.cz/schema/version_2/response.xsd" xmlns:rdc="http://www.stormware.cz/schema/version_2/documentresponse.xsd" xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd" xmlns:lst="http://www.stormware.cz/schema/version_2/list.xsd" xmlns:lStk="http://www.stormware.cz/schema/version_2/list_stock.xsd" xmlns:lAdb="http://www.stormware.cz/schema/version_2/list_addBook.xsd" xmlns:acu="http://www.stormware.cz/schema/version_2/accountingunit.xsd" xmlns:vch="http://www.stormware.cz/schema/version_2/voucher.xsd" xmlns:int="http://www.stormware.cz/schema/version_2/intDoc.xsd" xmlns:stk="http://www.stormware.cz/schema/version_2/stock.xsd" xmlns:ord="http://www.stormware.cz/schema/version_2/order.xsd" xmlns:ofr="http://www.stormware.cz/schema/version_2/offer.xsd" xmlns:enq="http://www.stormware.cz/schema/version_2/enquiry.xsd" xmlns:vyd="http://www.stormware.cz/schema/version_2/vydejka.xsd" xmlns:pri="http://www.stormware.cz/schema/version_2/prijemka.xsd" xmlns:bal="http://www.stormware.cz/schema/version_2/balance.xsd" xmlns:pre="http://www.stormware.cz/schema/version_2/prevodka.xsd" xmlns:vyr="http://www.stormware.cz/schema/version_2/vyroba.xsd" xmlns:pro="http://www.stormware.cz/schema/version_2/prodejka.xsd" xmlns:con="http://www.stormware.cz/schema/version_2/contract.xsd" xmlns:adb="http://www.stormware.cz/schema/version_2/addressbook.xsd" xmlns:prm="http://www.stormware.cz/schema/version_2/parameter.xsd" xmlns:lCon="http://www.stormware.cz/schema/version_2/list_contract.xsd" xmlns:ctg="http://www.stormware.cz/schema/version_2/category.xsd" xmlns:ipm="http://www.stormware.cz/schema/version_2/intParam.xsd" xmlns:str="http://www.stormware.cz/schema/version_2/storage.xsd" xmlns:idp="http://www.stormware.cz/schema/version_2/individualPrice.xsd" xmlns:sup="http://www.stormware.cz/schema/version_2/supplier.xsd" xmlns:prn="http://www.stormware.cz/schema/version_2/print.xsd" xmlns:act="http://www.stormware.cz/schema/version_2/accountancy.xsd" xmlns:bnk="http://www.stormware.cz/schema/version_2/bank.xsd">
+				<inv:roundingDocument>none</inv:roundingDocument>
+				<inv:roundingVAT>none</inv:roundingVAT>
+				<inv:homeCurrency>                    
+					<typ:priceNone>@(invoice.UD_UN=="UD" ? "0" : invoice.homeTotal.ToString())</typ:priceNone>
+					<typ:priceLow>0</typ:priceLow>
+					<typ:priceLowVAT>0</typ:priceLowVAT>
+					<typ:priceLowSum>0</typ:priceLowSum>
+					<typ:priceHigh>@(invoice.UD_UN=="UD" ? invoice.homePrice.ToString() : "0")</typ:priceHigh>
+					<typ:priceHighVAT>@(invoice.UD_UN=="UD" ? invoice.homeTax.ToString() : "0") </typ:priceHighVAT>
+					<typ:priceHighSum>@(invoice.UD_UN=="UD" ? invoice.homeTotal.ToString() : "0") </typ:priceHighSum>
+					<typ:price3>0</typ:price3>
+					<typ:price3VAT>0</typ:price3VAT>
+					<typ:price3Sum>0</typ:price3Sum>
+					<typ:round>
+						<typ:priceRound>0</typ:priceRound>
+					</typ:round>
+				</inv:homeCurrency>
+				<inv:foreignCurrency>
+					<typ:currency>
+						<typ:ids>@invoice.currency</typ:ids>
+					</typ:currency>
+					<typ:rate>@invoice.rate</typ:rate>
+					<typ:amount>1</typ:amount>
+					<typ:priceSum>@invoice.total</typ:priceSum>
+				</inv:foreignCurrency>
+			</inv:invoiceSummary>
+		</inv:invoice>
+	</dat:dataPackItem>
+    }
+</dat:dataPack>
