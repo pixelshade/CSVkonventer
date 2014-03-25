@@ -138,7 +138,7 @@ namespace CSVkonventer.Models
 
         private static void addAccountInfoToInvoiceFromCells(InvoiceModel invoice, string[] cells)
         {
-            invoice.company = cells[3];
+            invoice.company = cells[3].Replace("&", "&amp;"); ;
         }
 
         private static void addBillingInfoToInvoiceFromCells(InvoiceModel invoice, string[] cells)
@@ -185,7 +185,7 @@ namespace CSVkonventer.Models
             invoice.line_item_product_code = cells[19];
             invoice.line_item_accounting_code = cells[20];
             invoice.line_item_start_date = cells[21].Substring(0, 10);
-            invoice.line_item_end_date = cells[22].Substring(0, 10);
+            invoice.line_item_end_date = cells[21].Substring(0, 10);
             invoice.net_terms = cells[23];
             invoice.po_number = cells[24];
             invoice.collection_method = cells[25];
