@@ -163,8 +163,8 @@ namespace CSVkonventer.Models
             invoice.plan_code = cells[5];
             invoice.coupon_code = cells[6];
             invoice.total = Convert.ToDecimal(cells[7].Replace('.', ','));
-            invoice.totalTax = invoice.total / (_TAX + 1);
-            invoice.totalPrice = invoice.total - invoice.totalTax;
+            invoice.totalPrice = invoice.total / (1 + _TAX);
+            invoice.totalTax = invoice.total - invoice.totalPrice;
             invoice.subtotal = Convert.ToDecimal(cells[8].Replace('.', ','));
             invoice.vat_amount = cells[9];
             invoice.currency = cells[10];
