@@ -144,7 +144,7 @@ namespace CSVkonventer.Models
         {
             string[] time = invoice.time.Split(':'); 
             string[] date = invoice.date.Split('-'); // YYYY-mm-dd
-            return date[0]+ date[1]+ date[2] + time[0] + time[1];
+            return (date[0].Substring(2))+ date[1]+ date[2] + time[0] + time[1];
 //            return DateTime.Now.ToString("MMddssffff");
         }
     }

@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "";
 }@model CSVkonventer.Models.InvoicesViewModel
-<?xml version="1.0" encoding="Windows-1250"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <dat:dataPack version="2.0" id="Konvertor" ico="46238425" application="Transformace" note="Uživatelský export" xmlns:dat="http://www.stormware.cz/schema/version_2/data.xsd">
      @foreach(var invoice in Model.Invoices) {
      <dat:dataPackItem version="2.0" id="Konvertor (@invoice.invoice_number)">      

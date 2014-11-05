@@ -52,7 +52,7 @@ namespace CSVkonventer.Controllers
 
                 if (validInputFiles)
                 {
-                    Response.ContentEncoding = Encoding.GetEncoding("Windows-1250");//new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+                    Response.ContentEncoding = Encoding.GetEncoding("UTF-8");//new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
                     Response.ContentType = "text/xml";
                     Response.AddHeader("Content-Disposition", "attachment; filename=\"Pohoda-winf-" + CSVtoXMLExporter.ExportType + "-(" + System.DateTime.Now + ").xml\"");
                     return View(invoicesView);
