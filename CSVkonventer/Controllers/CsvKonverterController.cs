@@ -39,7 +39,7 @@ namespace CSVkonventer.Controllers
 
                 if (contentOfFiles.Count == 0)
                 {
-                    return this.RedirectToAction("Warning", routeValues: new { warning = "Musite poslat 3 subory z recurly. Accounts, Billing information a Invoices." });
+                    return this.RedirectToAction("Warning", routeValues: new { warning = "Neposlali ste ziaden subor" });
                 }
                 invoices = CSVtoXMLExporter.ReadCSVAddToInvoices(contentOfFiles);
                 validInputFiles = (invoices != null) ;
@@ -53,12 +53,12 @@ namespace CSVkonventer.Controllers
                 {
                     Response.ContentEncoding = Encoding.GetEncoding("Windows-1250");//new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
                     Response.ContentType = "text/xml";
-                    Response.AddHeader("Content-Disposition", "attachment; filename=\"Pohoda-winf(" + System.DateTime.Now + ").xml\"");
+                    Response.AddHeader("Content-Disposition", "attachment; filename=\"Pohoda-winf-" + CSVtoXMLExporter.ExportType + "-(" + System.DateTime.Now + ").xml\"");
                     return View(invoicesView);
                 }
                 else
                 {
-                    return this.RedirectToAction("Warning", routeValues: new { warning = CSVtoXMLExporter.warningMessage});
+                    return this.RedirectToAction("Warning", routeValues: new { warning = CSVtoXMLExporter.WarningMessage});
                 }
             
             }

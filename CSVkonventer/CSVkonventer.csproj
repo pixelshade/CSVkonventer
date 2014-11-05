@@ -126,10 +126,13 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CSVSplitter.cs" />
     <Compile Include="Models\CSVtoXMLExporter.cs" />
     <Compile Include="Models\InvoicesViewModel.cs" />
     <Compile Include="Models\InvoiceModel.cs" />
+    <Compile Include="Models\PayPalCsvExporter.cs" />
     <Compile Include="Models\RatesHistoryModel.cs" />
+    <Compile Include="Models\RecurlyCsvExporter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
