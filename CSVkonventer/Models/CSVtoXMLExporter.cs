@@ -10,6 +10,8 @@ namespace CSVkonventer.Models
 {
     public class CSVtoXMLExporter
     {
+
+        private const string _WINF_ACCOUNTS = "WinfAccountsInfoCSV";
         private const string _PAYPAL = "PaypalCSV";
         private const string _RECURLY_BASIC = "RecurlyBasicCSV";
         private const string _RECURLY_ACCOUNTS = "RecurlyAccountsCSV";
@@ -29,10 +31,63 @@ namespace CSVkonventer.Models
 
         public static Dictionary<string, InvoiceModel> ReadCSVAddToInvoices(List<string> contentOfFiles)
         {
+            if (contentOfFiles.Count == 3) return CreateRecurlyInvoices(contentOfFiles);
+            if (contentOfFiles.Count == 2) return CreatePayPalInvoices(contentOfFiles);
+            warningMessage += "Zly pocet suborov (recurly 3, paypal ma 2)"; return null;
+        }
+
+        private static Dictionary<string, InvoiceModel> CreatePayPalInvoices(List<string> contentOfFiles)
+        {
             RatesHistoryModel ratesHistory = new RatesHistoryModel();
             Dictionary<String, InvoiceModel> invoices = new Dictionary<string, InvoiceModel>();
 
-            if (contentOfFiles.Count != 3) { warningMessage += "Nedostatocny pocet suborov! "; return null; }
+            String invoicesPayPal = getPayPalInvoices(contentOfFiles);
+            String accountsPayPal = getPayPalWinfAccountInfo(contentOfFiles);
+
+            if (invoicesPayPal == null) { warningMessage += "Nepodarilo sa najst invoices Paypal subor! "; return null; };
+            if (accountsPayPal == null) { warningMessage += "Nepodarilo sa najst accounts PayPal-winf subor! "; return null; };
+
+            string[] lines = SplitCsvToLines(invoicesPayPal);
+            for (int i = 1; i < lines.Length; ++i)
+            {
+                var cells = SplitCsvLineToCells(lines[i]);
+                InvoiceModel invoice = new InvoiceModel();
+                invoice = recurlyBasicInvoiceFromCells(invoice, cells);
+
+                if ((invoice != null) && (invoice.line_item_total >= 0))
+                {
+                    invoice.rate = ratesHistory.getRateForDate(invoice.date, invoice.currency);
+                    invoice.homeTotal = GethomeTotalFrom(invoice.total, invoice.rate);
+                    invoice.homeTax = invoice.homeTotal * _TAX;
+                    invoice.homePrice = invoice.homeTotal - invoice.homeTax;
+
+                    if (!invoices.ContainsKey(invoice.id) && (!invoice.status.Equals("open")))
+                    {
+                        invoices.Add(invoice.id, invoice);
+                    }
+                }
+            }
+
+            lines = SplitCsvToLines(accountsPayPal);
+            for (int i = 1; i < lines.Length; ++i)
+            {
+                var cells = SplitCsvLineToCells(lines[i]);
+                var acc_id = cells[0];
+
+                InvoiceModel invoiceWithSameAccID = getInvoiceFromInvoicesByAccountId(invoices, acc_id);
+
+                if (invoiceWithSameAccID != null)
+                {
+                    addPayPalAccountInfoToInvoiceFromCells(invoiceWithSameAccID, cells);
+                }
+            }
+            return invoices;
+        }
+
+        private static Dictionary<string, InvoiceModel> CreateRecurlyInvoices(List<string> contentOfFiles)
+        {
+            RatesHistoryModel ratesHistory = new RatesHistoryModel();
+            Dictionary<String, InvoiceModel> invoices = new Dictionary<string, InvoiceModel>();
 
             String invoicesRecurly = getBasicInvoicesFromFiles(contentOfFiles);
             String accountsRecurly = getAccountsFromFiles(contentOfFiles);
@@ -41,17 +96,17 @@ namespace CSVkonventer.Models
             if (invoicesRecurly == null) { warningMessage += "Nepodarilo sa najst invoices subor! "; return null; };
             if (accountsRecurly == null) { warningMessage += "Nepodarilo sa najst accounts subor! "; return null; };
             if (billingsRecurly == null) { warningMessage += "Nepodarilo sa najst billings subor! "; return null; };
-            
-            string[] lines = SplitCsvToLines(invoicesRecurly);            
-            for(int i = 1; i < lines.Length; ++i){                
+
+            string[] lines = SplitCsvToLines(invoicesRecurly);
+            for (int i = 1; i < lines.Length; ++i)
+            {
                 var cells = SplitCsvLineToCells(lines[i]);
-                InvoiceModel invoice = new InvoiceModel();            
-                invoice = recurlyBasicInvoiceFromCells(invoice,cells);
-                
-                if ((invoice!=null) && (invoice.line_item_total >= 0))
+                InvoiceModel invoice = new InvoiceModel();
+                invoice = recurlyBasicInvoiceFromCells(invoice, cells);
+
+                if ((invoice != null) && (invoice.line_item_total >= 0))
                 {
                     invoice.rate = ratesHistory.getRateForDate(invoice.date, invoice.currency);
-                    //invoice.homeTotal = GethomeTotalFrom(invoice.line_item_total, invoice.rate);
                     invoice.homeTotal = GethomeTotalFrom(invoice.total, invoice.rate);
                     invoice.homeTax = invoice.homeTotal * _TAX;
                     invoice.homePrice = invoice.homeTotal - invoice.homeTax;
@@ -64,40 +119,67 @@ namespace CSVkonventer.Models
             }
 
             lines = SplitCsvToLines(accountsRecurly);
-            for (int i = 1; i < lines.Length; ++i){
+            for (int i = 1; i < lines.Length; ++i)
+            {
                 var cells = SplitCsvLineToCells(lines[i]);
                 var acc_id = cells[0];
 
                 InvoiceModel invoiceWithSameAccID = getInvoiceFromInvoicesByAccountId(invoices, acc_id);
 
-                if (invoiceWithSameAccID!=null)
+                if (invoiceWithSameAccID != null)
                 {
-                    addAccountInfoToInvoiceFromCells(invoiceWithSameAccID,cells);
+                    addAccountInfoToInvoiceFromCells(invoiceWithSameAccID, cells);
                 }
             }
 
             lines = SplitCsvToLines(billingsRecurly);
-            for (int i = 1; i < lines.Length; ++i){
+            for (int i = 1; i < lines.Length; ++i)
+            {
                 var cells = SplitCsvLineToCells(lines[i]);
                 var acc_id = cells[0];
 
                 InvoiceModel invoiceWithSameAccID = getInvoiceFromInvoicesByAccountId(invoices, acc_id);
 
-                if (invoiceWithSameAccID!=null)
+                if (invoiceWithSameAccID != null)
                 {
                     addBillingInfoToInvoiceFromCells(invoiceWithSameAccID, cells);
                 }
-            }            
+            }
             return invoices;
         }
 
+
         private static InvoiceModel getInvoiceFromInvoicesByAccountId(Dictionary<String, InvoiceModel> invoices ,string acc_id)
         {
-            if(invoices!=null){
-                foreach(InvoiceModel invoice in invoices.Values){
-                    if(invoice.account_code.Equals(acc_id))
-                        return invoice;
-                }                
+            if (invoices == null) return null;
+            foreach(InvoiceModel invoice in invoices.Values){
+                if(invoice.account_code.Equals(acc_id))
+                    return invoice;
+            }
+            return null;
+        }
+
+
+        private static String getPayPalInvoices(List<String> contentOfFiles)
+        {
+            foreach (String fileContent in contentOfFiles)
+            {
+                if (getCSVFormat(fileContent) == _PAYPAL)
+                {
+                    return fileContent;
+                }
+            }
+            return null;
+        }
+
+        private static String getPayPalWinfAccountInfo(List<String> contentOfFiles)
+        {
+            foreach (String fileContent in contentOfFiles)
+            {
+                if (getCSVFormat(fileContent) == _WINF_ACCOUNTS)
+                {
+                    return fileContent;
+                }
             }
             return null;
         }
@@ -137,6 +219,12 @@ namespace CSVkonventer.Models
                 }
             }
             return null;
+        }
+
+        private static void addPayPalAccountInfoToInvoiceFromCells(InvoiceModel invoice, string[] cells)
+        {
+            // TODO popridavat adresy a ine veci
+            invoice.company = cells[3].Replace("&", "&amp;"); ;
         }
 
 
