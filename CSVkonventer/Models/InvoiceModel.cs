@@ -47,6 +47,7 @@ namespace CSVkonventer.Models
         public decimal homeTotal { get; set; }
         public decimal homeTax { get; set; }
         public decimal homePrice { get; set; }
+        public decimal net { get; set; }
 
         public string company { get; set; }
         public string postal_code { get; set; }

@@ -55,7 +55,11 @@ namespace CSVkonventer.Models
                     invoice.homeTotal = GethomeTotalFrom(invoice.total, invoice.rate);
                     invoice.homeTax = invoice.homeTotal * _TAX;
                     invoice.homePrice = invoice.homeTotal - invoice.homeTax;
-                    invoices.Add(invoice.id, invoice);
+
+                    if (!invoices.ContainsKey(invoice.id) && (!invoice.status.Equals("open")))
+                    {
+                        invoices.Add(invoice.id, invoice);
+                    }
                 }
             }
 
@@ -171,12 +175,12 @@ namespace CSVkonventer.Models
             invoice.date = cells[11].Substring(0, 10);
             invoice.status = cells[12];
 
-            if (!invoice.status.Equals("closed"))
+            if (invoice.status.Equals("open"))
             {
                 return null;
             }
 
-            invoice.closed_at = cells[13].Substring(0, 10);
+            invoice.closed_at = cells[13].Length > 10 ? cells[13].Substring(0, 10) : invoice.date;
             invoice.purchase_country = cells[14];
             invoice.vat_number = cells[15];
             invoice.line_item_total = Convert.ToDecimal(cells[16].Replace('.', ','));
@@ -217,6 +221,8 @@ namespace CSVkonventer.Models
 
         private static InvoiceModel paypalInvoiceFromCells(string[] cells)
         {
+            if (isItemIDInPayPalCellAllowed(cells[20])) return null; //itemId identifikator
+
             InvoiceModel invoice = new InvoiceModel();
             invoice.invoice_number = generateInvoiceNumberForPayPal();
             invoice.id = cells[12]; //Transaction ID                    
@@ -225,18 +231,32 @@ namespace CSVkonventer.Models
             invoice.email_to = cells[11];
             invoice.total = Convert.ToDecimal(cells[7]); //gross <---------asi net
             invoice.subtotal = Convert.ToDecimal(cells[9]); //asi Net?                    
-            invoice.currency = cells[6]; //currency
+            invoice.currency = cells[7]; //currency
             string[] date = cells[0].Split('/');
             invoice.date = date[2] + '-' + date[0] + '-' + date[1];//date
             invoice.closed_at = invoice.date;
             invoice.status = cells[5];//status
             invoice.purchase_country = cells[14]; //address status                    
-            invoice.line_item_total = Convert.ToDecimal(cells[7]); // ?? Net ? Gross?
+            invoice.line_item_total = Convert.ToDecimal(cells[8]); // Gross
+            invoice.net = Convert.ToDecimal(cells[10]); //net
+            
+
             invoice.line_item_description = cells[15]; //title 
             invoice.line_item_product_code = cells[16];  //product code                 
             invoice.type = cells[4];  //type   
             return invoice;
         }
+
+        private static bool isItemIDInPayPalCellAllowed(string itemID)
+        {
+            if (itemID.Equals("paypal-1") || itemID.Equals("paypal-2") || itemID.Equals("paypal-vat-1") ||
+                itemID.Equals("paypal-vat-2"))
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         private static string generateInvoiceNumberForPayPal()
         {
