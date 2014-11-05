@@ -37,9 +37,7 @@ namespace CSVkonventer.Models
             set
             {
                 _total = value;
-                homeTotal = _rate == 0 ? _total : Math.Round(_total / _rate, 2);
-                totalPrice = _total / (1 + _TAX);
-                totalTax = _total - totalPrice;
+                calculateTaxesAndHome();
             }
         }
 
@@ -100,7 +98,7 @@ namespace CSVkonventer.Models
             set
             {
                 _rate = value;
-                homeTotal = value == 0 ? _total : Math.Round(_total / value, 2);
+               calculateTaxesAndHome();
             } 
         }
         public decimal homeTotal { get; set; }
@@ -112,16 +110,22 @@ namespace CSVkonventer.Models
         public string company { get; set; }
         public string postal_code { get; set; }
         public string UD_UN { get; set; }
-
-
-
+        public string time { get; set; }
+        
 
         public decimal totalTax { get; set; }
         public decimal totalPrice { get; set; }
 
 
 
-
+        private void calculateTaxesAndHome()
+        {
+            homeTotal = _rate == 0 ? _total : Math.Round(_total / _rate, 2);
+            totalPrice = _total / (1 + _TAX);
+            totalTax = _total - totalPrice;
+            homeTax = homeTotal * _TAX;
+            homePrice = homeTotal - homeTax;
+        }
 
 
         private void setUdUnType()

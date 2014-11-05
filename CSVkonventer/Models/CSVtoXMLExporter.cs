@@ -15,15 +15,16 @@ namespace CSVkonventer.Models
 
         public static Dictionary<string, InvoiceModel> ReadCSVAddToInvoices(List<string> contentOfFiles)
         {
+            WarningMessage = "";
             if (contentOfFiles.Count == 3)
             {
                 ExportType = "Recurly";
-                return RecurlyCsvExporter.CreateRecurlyInvoices(contentOfFiles, WarningMessage);
+                return RecurlyCsvExporter.CreateRecurlyInvoices(contentOfFiles);
             }
             if (contentOfFiles.Count == 2)
             {
                 ExportType = "PayPal";
-                return PayPalCsvExporter.CreatePayPalInvoices(contentOfFiles, WarningMessage);
+                return PayPalCsvExporter.CreatePayPalInvoices(contentOfFiles);
             }
             WarningMessage += "Zly pocet suborov (recurly 3, paypal ma 2)";
             return null;

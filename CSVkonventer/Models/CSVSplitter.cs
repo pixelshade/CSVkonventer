@@ -18,6 +18,7 @@ namespace CSVkonventer.Models
 
         public static string getCSVFormat(string firstLine)
         {
+            if (firstLine.StartsWith("\"Paypal Transaction Id\",\"Plan Code\",\"Paid Amount In Cents\"")) { return _WINF_ACCOUNTS; }
             if (firstLine.StartsWith("Date,")) { return _PAYPAL; }
             if (firstLine.StartsWith("id,")) { return _RECURLY_BASIC; }
             if (firstLine.StartsWith("account_code,account_email,account_username")) { return _RECURLY_ACCOUNTS; }

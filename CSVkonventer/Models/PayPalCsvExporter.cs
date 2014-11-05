@@ -8,7 +8,7 @@ namespace CSVkonventer.Models
     public class PayPalCsvExporter
     {
 
-        public static Dictionary<string, InvoiceModel> CreatePayPalInvoices(List<string> contentOfFiles, String warningMessage)
+        public static Dictionary<string, InvoiceModel> CreatePayPalInvoices(List<string> contentOfFiles)
         {
             RatesHistoryModel ratesHistory = new RatesHistoryModel();
             Dictionary<String, InvoiceModel> invoices = new Dictionary<string, InvoiceModel>();
@@ -16,8 +16,8 @@ namespace CSVkonventer.Models
             String invoicesPayPal = getPayPalInvoices(contentOfFiles);
             String accountsPayPal = getPayPalWinfAccountInfo(contentOfFiles);
 
-            if (invoicesPayPal == null) { warningMessage += "Nepodarilo sa najst invoices Paypal subor! "; return null; };
-            if (accountsPayPal == null) { warningMessage += "Nepodarilo sa najst accounts PayPal-winf subor! "; return null; };
+            if (invoicesPayPal == null) { CSVtoXMLExporter.WarningMessage += "Nepodarilo sa najst invoices Paypal subor! \n"; return null; };
+            if (accountsPayPal == null) { CSVtoXMLExporter.WarningMessage += "Nepodarilo sa najst accounts PayPal-winf subor! \n"; return null; };
 
             string[] lines = CSVSplitter.SplitCsvToLines(invoicesPayPal);
             for (int i = 1; i < lines.Length; ++i)
@@ -25,15 +25,17 @@ namespace CSVkonventer.Models
                 var cells = CSVSplitter.SplitCsvLineToCells(lines[i]);
                 InvoiceModel invoice = paypalInvoiceFromCells(cells);
 
-                if ((invoice != null) && (invoice.line_item_total >= 0))
+                if ((invoice != null))
                 {
                     invoice.rate = ratesHistory.getRateForDate(invoice.date, invoice.currency);
-                    invoice.homeTax = invoice.homeTotal * InvoiceModel._TAX;
-                    invoice.homePrice = invoice.homeTotal - invoice.homeTax;
-
-                    if (!invoices.ContainsKey(invoice.id) && (!invoice.status.Equals("open")))
+                    if (!invoices.ContainsKey(invoice.transactionId))
                     {
-                        invoices.Add(invoice.id, invoice);
+                        invoices.Add(invoice.transactionId, invoice);
+                    }
+                    else
+                    {
+                        CSVtoXMLExporter.WarningMessage +=
+                            "Pozor, boli dve rovnake transaction id keys v dictionary, treba premysliet";
                     }
                 }
             }
@@ -59,10 +61,9 @@ namespace CSVkonventer.Models
         private static void addPayPalAccountInfoToInvoiceFromCells(InvoiceModel invoice, string[] cells)
         {
             invoice.plan_code = cells[1];
-            invoice.currency = "USD";
             invoice.line_item_start_date = cells[3].Substring(0, 10);
             invoice.line_item_end_date = cells[4].Substring(0, 10);
-            invoice.account_name = cells[5] + " " + cells[6];
+            if(cells[5].Length > 1 && cells[6].Length > 1) invoice.account_name = cells[5] + " " + cells[6];
             invoice.company = cells[7].Replace("&", "&amp;");
             invoice.street = cells[9].Replace("&", "&amp;");
             invoice.city = cells[10].Replace("&", "&amp;");
@@ -74,29 +75,26 @@ namespace CSVkonventer.Models
 
         private static InvoiceModel paypalInvoiceFromCells(string[] cells)
         {
-            if (isItemIDInPayPalCellAllowed(cells[20])) return null; //itemId identifikator
+            if (!isItemIDInPayPalCellAllowed(cells[20])) return null; //itemId identifikator
 
             InvoiceModel invoice = new InvoiceModel();
-            invoice.invoice_number = generateInvoiceNumberForPayPal();
-            invoice.id = cells[12]; //Transaction ID                    
-            invoice.account_name = cells[3]; //name
-            invoice.email = cells[10];
-            invoice.email_to = cells[11];
-            invoice.total = Convert.ToDecimal(cells[7]); //gross <---------asi net
-            invoice.subtotal = Convert.ToDecimal(cells[9]); //asi Net?                    
-            invoice.currency = cells[7]; //currency
             string[] date = cells[0].Split('/');
+            if (date[0].Length == 1) date[0] = "0"+date[0];
+            if (date[1].Length == 1) date[1] = "0" + date[1];
             invoice.date = date[2] + '-' + date[0] + '-' + date[1];//date
+            invoice.account_name = cells[3];
             invoice.closed_at = invoice.date;
-            invoice.status = cells[5];//status
-            invoice.purchase_country = cells[14]; //address status                    
-            invoice.line_item_total = Convert.ToDecimal(cells[8]); // Gross
-            invoice.net = Convert.ToDecimal(cells[10]); //net
+            invoice.time = cells[1]; // time
+            invoice.account_name = cells[3]; //name
+            invoice.currency = cells[7]; //currency
+            invoice.total = Convert.ToDecimal(cells[8]); //gross
+            invoice.subtotal = Convert.ToDecimal(cells[10]); // Net     
+            invoice.email = cells[12]; // from email
+            invoice.email_to = cells[13]; // to email
+            invoice.transactionId = cells[14]; //Transaction ID                    
+            invoice.line_item_description = cells[19]; //item title 
 
-
-            invoice.line_item_description = cells[15]; //title 
-            invoice.line_item_product_code = cells[16];  //product code                 
-            invoice.type = cells[4];  //type   
+            invoice.invoice_number = generateInvoiceNumberFromInvoice(invoice);
             return invoice;
         }
 
@@ -113,11 +111,7 @@ namespace CSVkonventer.Models
         private static InvoiceModel getInvoiceFromInvoicesByTransactionId(Dictionary<String, InvoiceModel> invoices, string transactionId)
         {
             if (invoices == null) return null;
-            foreach (InvoiceModel invoice in invoices.Values)
-            {
-                if (invoice.transactionId.Equals(transactionId))
-                    return invoice;
-            }
+            if (invoices.ContainsKey(transactionId)) return invoices[transactionId];
             return null;
         }
 
@@ -146,9 +140,12 @@ namespace CSVkonventer.Models
         }
 
 
-        private static string generateInvoiceNumberForPayPal()
+        private static string generateInvoiceNumberFromInvoice(InvoiceModel invoice)
         {
-            return DateTime.Now.ToString("MMddssffff");
+            string[] time = invoice.time.Split(':'); 
+            string[] date = invoice.date.Split('-'); // YYYY-mm-dd
+            return date[0]+ date[1]+ date[2] + time[0] + time[1];
+//            return DateTime.Now.ToString("MMddssffff");
         }
     }
 }

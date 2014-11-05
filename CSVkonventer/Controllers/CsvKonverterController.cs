@@ -39,7 +39,8 @@ namespace CSVkonventer.Controllers
 
                 if (contentOfFiles.Count == 0)
                 {
-                    return this.RedirectToAction("Warning", routeValues: new { warning = "Neposlali ste ziaden subor" });
+                    CSVtoXMLExporter.WarningMessage += "Neposlali ste ziaden subor";
+                    return this.RedirectToAction("Warning");
                 }
                 invoices = CSVtoXMLExporter.ReadCSVAddToInvoices(contentOfFiles);
                 validInputFiles = (invoices != null) ;
@@ -58,7 +59,7 @@ namespace CSVkonventer.Controllers
                 }
                 else
                 {
-                    return this.RedirectToAction("Warning", routeValues: new { warning = CSVtoXMLExporter.WarningMessage});
+                    return this.RedirectToAction("Warning");
                 }
             
             }
@@ -69,7 +70,7 @@ namespace CSVkonventer.Controllers
 
         public ActionResult Warning(string warning)
         {
-            ViewBag.WarningMessage = warning;
+            ViewBag.WarningMessage = CSVtoXMLExporter.WarningMessage;
             return View();
         }
     }

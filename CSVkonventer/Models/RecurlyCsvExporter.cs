@@ -8,7 +8,7 @@ namespace CSVkonventer.Models
     public class RecurlyCsvExporter
     {
 
-        public static Dictionary<string, InvoiceModel> CreateRecurlyInvoices(List<string> contentOfFiles, String warningMessage)
+        public static Dictionary<string, InvoiceModel> CreateRecurlyInvoices(List<string> contentOfFiles)
         {
             RatesHistoryModel ratesHistory = new RatesHistoryModel();
             Dictionary<String, InvoiceModel> invoices = new Dictionary<string, InvoiceModel>();
@@ -17,9 +17,9 @@ namespace CSVkonventer.Models
             String accountsRecurly = getAccountsFromFiles(contentOfFiles);
             String billingsRecurly = getBillingsFromFiles(contentOfFiles);
 
-            if (invoicesRecurly == null) { warningMessage += "Nepodarilo sa najst invoices subor! "; return null; };
-            if (accountsRecurly == null) { warningMessage += "Nepodarilo sa najst accounts subor! "; return null; };
-            if (billingsRecurly == null) { warningMessage += "Nepodarilo sa najst billings subor! "; return null; };
+            if (invoicesRecurly == null) { CSVtoXMLExporter.WarningMessage += "Nepodarilo sa najst invoices subor! "; return null; };
+            if (accountsRecurly == null) { CSVtoXMLExporter.WarningMessage += "Nepodarilo sa najst accounts subor! "; return null; };
+            if (billingsRecurly == null) { CSVtoXMLExporter.WarningMessage += "Nepodarilo sa najst billings subor! "; return null; };
 
             string[] lines = CSVSplitter.SplitCsvToLines(invoicesRecurly);
             for (int i = 1; i < lines.Length; ++i)
@@ -31,9 +31,6 @@ namespace CSVkonventer.Models
                 if ((invoice != null) && (invoice.line_item_total >= 0))
                 {
                     invoice.rate = ratesHistory.getRateForDate(invoice.date, invoice.currency);
-                    invoice.homeTax = invoice.homeTotal * InvoiceModel._TAX;
-                    invoice.homePrice = invoice.homeTotal - invoice.homeTax;
-
                     if (!invoices.ContainsKey(invoice.id) && (!invoice.status.Equals("open")))
                     {
                         invoices.Add(invoice.id, invoice);
@@ -118,7 +115,7 @@ namespace CSVkonventer.Models
             invoice.line_item_product_code = cells[19];
             invoice.line_item_accounting_code = cells[20];
             invoice.line_item_start_date = cells[21].Substring(0, 10);
-            invoice.line_item_end_date = cells[22].Substring(0, 10);
+            invoice.line_item_end_date = cells[21].Substring(0, 10);
             invoice.net_terms = cells[23];
             invoice.po_number = cells[24];
             invoice.collection_method = cells[25];
