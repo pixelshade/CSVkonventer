@@ -94,7 +94,7 @@ namespace CSVkonventer.Models
             invoice.transactionId = cells[14]; //Transaction ID                    
             invoice.line_item_description = cells[19]; //item title 
 
-            invoice.invoice_number = generateInvoiceNumberFromInvoice(invoice);
+            invoice.invoice_number = invoice.transactionId;
             return invoice;
         }
 
