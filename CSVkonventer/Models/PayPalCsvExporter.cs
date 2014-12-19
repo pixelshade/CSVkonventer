@@ -100,8 +100,7 @@ namespace CSVkonventer.Models
 
         private static bool isItemIDInPayPalCellAllowed(string itemID)
         {
-            if (itemID.Equals("paypal-1") || itemID.Equals("paypal-2") || itemID.Equals("paypal-vat-1") ||
-                itemID.Equals("paypal-vat-2"))
+            if (itemID.StartsWith("paypal-"))
             {
                 return true;
             }
